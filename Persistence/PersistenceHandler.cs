@@ -36,33 +36,12 @@ namespace HealthOS.Persistence
             {
                 _connection = new NpgsqlConnection(_connectionString);
                 _connection.Open();
-                PrepareStatements();
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex.Message);
                 Environment.Exit(-1);
             }
-        }
-
-        private void PrepareStatements()
-        {
-            using var cmd = _connection.CreateCommand();
-
-            cmd.CommandText = "SELECT * FROM employees";
-            cmd.Prepare();
-
-            cmd.CommandText = "SELECT * FROM employees WHERE id = @id";
-            cmd.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
-            cmd.Prepare();
-
-            cmd.CommandText = "INSERT INTO employees (name, phone, position_id, department_id, room_id) VALUES (@name, @phone, @position_id, @department_id, @room_id)";
-            cmd.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
-            cmd.Parameters.Add(new NpgsqlParameter("@phone", DbType.Int32));
-            cmd.Parameters.Add(new NpgsqlParameter("@position_id", DbType.Int32));
-            cmd.Parameters.Add(new NpgsqlParameter("@department_id", DbType.Int32));
-            cmd.Parameters.Add(new NpgsqlParameter("@room_id", DbType.Int32));
-            cmd.Prepare();
         }
 
         public List<Employee> GetEmployees()
