@@ -4,6 +4,11 @@ using System.Data;
 using Npgsql;
 using HealthOS.Domain;
 
+/**
+ *
+ * @author Oliver Aleksander Larsen | ollar22
+ */
+
 namespace HealthOS.Persistence
 {
     public class PersistenceHandler : IPersistenceHandler

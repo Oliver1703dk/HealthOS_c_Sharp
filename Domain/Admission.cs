@@ -1,3 +1,9 @@
+
+/**
+ *
+ * @author Oliver Aleksander Larsen | ollar22
+ */
+
 namespace HealthOS.Domain
 {
     public class Admission

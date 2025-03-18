@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 using HealthOS.Domain;
 using HealthOS.Persistence;
 
+/**
+ *
+ * @author Oliver Aleksander Larsen | ollar22
+ */
+
 namespace HealthOS.Presentation
 {
     public class MainApp
