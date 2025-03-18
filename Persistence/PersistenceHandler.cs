@@ -15,10 +15,10 @@ namespace HealthOS.Persistence
         private PersistenceHandler()
         {
             string host = "localhost";
-            int port = 5432;
-            string database = "postgres";
-            string username = "postgres";
-            string password = "";
+            int port = 5432; // Change to your own port (Should be the same)
+            string database = "postgres"; // Change to your own database
+            string username = "postgres"; // Change to your own username
+            string password = ""; // Change to your own password
 
             _connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password}";
 
