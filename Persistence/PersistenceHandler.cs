@@ -70,3 +70,4 @@ public class PersistenceHandler : IPersistenceHandler
         return true;
     }
 }
+

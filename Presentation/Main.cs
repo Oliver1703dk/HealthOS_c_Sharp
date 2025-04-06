@@ -5,8 +5,6 @@
  */
 using System;
 using MongoDB.Bson;
-// using HealthOS.Domain;
-// using HealthOS.Persistence;
 
 namespace HealthOS.Presentation
 {
@@ -127,9 +125,15 @@ namespace HealthOS.Presentation
             string name = Console.ReadLine();
 
             int phone = ReadInt("phone number");
-            int positionId = ReadInt("position ID");
-            int departmentId = ReadInt("department ID");
-            int roomId = ReadInt("room ID");
+
+            Console.Write("Enter position ID (ObjectId): ");
+            string positionId = Console.ReadLine();
+
+            Console.Write("Enter department ID (ObjectId): ");
+            string departmentId = Console.ReadLine();
+
+            Console.Write("Enter room ID (ObjectId): ");
+            string roomId = Console.ReadLine();
 
             var employee = new Employee
             {
@@ -181,7 +185,8 @@ namespace HealthOS.Presentation
             Console.Write("Enter patient ID (ObjectId): ");
             string patientId = Console.ReadLine();
 
-            int roomId = ReadInt("room ID");
+            Console.Write("Enter room ID (ObjectId): ");
+            string roomId = Console.ReadLine();
 
             Console.Write("Enter bed ID (ObjectId): ");
             string bedId = Console.ReadLine();
@@ -200,7 +205,6 @@ namespace HealthOS.Presentation
             persistenceHandler.CreateAdmission(admission);
             Console.WriteLine("Admission created.");
         }
-
 
         private static int ReadInt(string label)
         {

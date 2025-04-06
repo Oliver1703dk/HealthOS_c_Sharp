@@ -15,7 +15,8 @@ public class Admission
     [BsonRepresentation(BsonType.ObjectId)]
     public string patientId { get; set; }
 
-    public int roomId { get; set; }
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string roomId { get; set; }
 
     [BsonRepresentation(BsonType.ObjectId)]
     public string bedId { get; set; }

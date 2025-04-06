@@ -15,8 +15,14 @@ public class Employee
     public string name { get; set; }
     public int phone { get; set; }
 
-    public int positionId { get; set; }
-    public int departmentId { get; set; }
-    public int roomId { get; set; }
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string positionId { get; set; }
+
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string departmentId { get; set; }
+
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string roomId { get; set; }
 }
+
 
