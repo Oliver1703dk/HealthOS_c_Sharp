@@ -3,23 +3,14 @@
  *
  * @author Oliver Aleksander Larsen | ollar22
  */
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
-namespace HealthOS.Domain
+public class Bed
 {
-    public class Bed
-    {
-        public int Id { get; }
-        public string BedNumber { get; }
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string id { get; set; }
 
-        public Bed(int id, string bedNumber)
-        {
-            Id = id;
-            BedNumber = bedNumber;
-        }
-
-        public override string ToString()
-        {
-            return $"Bed{{ id={Id}, name={BedNumber} }}";
-        }
-    }
+    public int number { get; set; }
 }

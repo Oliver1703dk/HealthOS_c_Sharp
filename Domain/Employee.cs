@@ -3,31 +3,20 @@
  *
  * @author Oliver Aleksander Larsen | ollar22
  */
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
-namespace HealthOS.Domain
+public class Employee
 {
-    public class Employee
-    {
-        public int Id { get; }
-        public string Name { get; }
-        public int Phone { get; }
-        public int PositionId { get; }
-        public int DepartmentId { get; }
-        public int RoomId { get; }
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string id { get; set; }
 
-        public Employee(int id, string name, int phone, int positionId, int departmentId, int roomId)
-        {
-            Id = id;
-            Name = name;
-            Phone = phone;
-            PositionId = positionId;
-            DepartmentId = departmentId;
-            RoomId = roomId;
-        }
+    public string name { get; set; }
+    public int phone { get; set; }
 
-        public override string ToString()
-        {
-            return $"Employee{{ id={Id}, name={Name}, phone={Phone}, position_id={PositionId}, department_id={DepartmentId}, room_id={RoomId} }}";
-        }
-    }
+    public int positionId { get; set; }
+    public int departmentId { get; set; }
+    public int roomId { get; set; }
 }
+

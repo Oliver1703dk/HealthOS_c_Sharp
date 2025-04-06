@@ -1,15 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HealthOS.Domain;
-using HealthOS.Persistence;
 
 /**
  *
  * @author Oliver Aleksander Larsen | ollar22
  */
+using System;
+using MongoDB.Bson;
+// using HealthOS.Domain;
+// using HealthOS.Persistence;
 
 namespace HealthOS.Presentation
 {
@@ -19,31 +16,28 @@ namespace HealthOS.Presentation
         {
             Console.WriteLine(
                 "------------------------------------------\n" +
-                "WELCOME TO HealthOS\n" +
+                "WELCOME TO HealthOS (.NET + MongoDB)\n" +
                 "Please input your command or type \"help\"\n" +
                 "------------------------------------------\n"
             );
 
             bool running = true;
-            IPersistenceHandler persistenceHandler = PersistenceHandler.GetInstance();
-            
+            IPersistenceHandler persistenceHandler = new PersistenceHandler();
+
             while (running)
             {
                 Console.Write("> ");
-                string command = Console.ReadLine()?.ToLower();
+                string command = Console.ReadLine()?.Trim().ToLower();
 
                 switch (command)
                 {
                     case "getemployees":
-                        Console.WriteLine(string.Join("\n", persistenceHandler.GetEmployees()));
+                        persistenceHandler.GetEmployees().ForEach(e => Console.WriteLine(e.ToBsonDocument()));
                         break;
 
                     case "getemployee":
-                        Console.Write("What is the employee ID? ");
-                        if (int.TryParse(Console.ReadLine(), out int empId))
-                            Console.WriteLine(persistenceHandler.GetEmployee(empId));
-                        else
-                            Console.WriteLine("Invalid input. Please enter a number.");
+                        Console.Write("Enter employee ID: ");
+                        Console.WriteLine(persistenceHandler.GetEmployee(Console.ReadLine()).ToBsonDocument());
                         break;
 
                     case "createemployee":
@@ -51,15 +45,12 @@ namespace HealthOS.Presentation
                         break;
 
                     case "getpatients":
-                        Console.WriteLine(string.Join("\n", persistenceHandler.GetPatients()));
+                        persistenceHandler.GetPatients().ForEach(p => Console.WriteLine(p.ToBsonDocument()));
                         break;
 
                     case "getpatient":
-                        Console.Write("What is the patient ID? ");
-                        if (int.TryParse(Console.ReadLine(), out int patId))
-                            Console.WriteLine(persistenceHandler.GetPatient(patId));
-                        else
-                            Console.WriteLine("Invalid input. Please enter a number.");
+                        Console.Write("Enter patient ID: ");
+                        Console.WriteLine(persistenceHandler.GetPatient(Console.ReadLine()).ToBsonDocument());
                         break;
 
                     case "createpatient":
@@ -67,15 +58,12 @@ namespace HealthOS.Presentation
                         break;
 
                     case "getbeds":
-                        Console.WriteLine(string.Join("\n", persistenceHandler.GetBeds()));
+                        persistenceHandler.GetBeds().ForEach(b => Console.WriteLine(b.ToBsonDocument()));
                         break;
 
                     case "getbed":
-                        Console.Write("What is the bed ID? ");
-                        if (int.TryParse(Console.ReadLine(), out int bedId))
-                            Console.WriteLine(persistenceHandler.GetBed(bedId));
-                        else
-                            Console.WriteLine("Invalid input. Please enter a number.");
+                        Console.Write("Enter bed ID: ");
+                        Console.WriteLine(persistenceHandler.GetBed(Console.ReadLine()).ToBsonDocument());
                         break;
 
                     case "createbed":
@@ -83,15 +71,12 @@ namespace HealthOS.Presentation
                         break;
 
                     case "getadmissions":
-                        Console.WriteLine(string.Join("\n", persistenceHandler.GetAdmissions()));
+                        persistenceHandler.GetAdmissions().ForEach(a => Console.WriteLine(a.ToBsonDocument()));
                         break;
 
                     case "getadmission":
-                        Console.Write("What is the admission ID? ");
-                        if (int.TryParse(Console.ReadLine(), out int admId))
-                            Console.WriteLine(persistenceHandler.GetAdmission(admId));
-                        else
-                            Console.WriteLine("Invalid input. Please enter a number.");
+                        Console.Write("Enter admission ID: ");
+                        Console.WriteLine(persistenceHandler.GetAdmission(Console.ReadLine()).ToBsonDocument());
                         break;
 
                     case "createadmission":
@@ -99,11 +84,10 @@ namespace HealthOS.Presentation
                         break;
 
                     case "deleteadmission":
-                        Console.Write("What is the admission ID? ");
-                        if (int.TryParse(Console.ReadLine(), out int delAdmId))
-                            Console.WriteLine(persistenceHandler.DeleteAdmission(delAdmId) ? "Admission deleted." : "Failed to delete admission.");
-                        else
-                            Console.WriteLine("Invalid input. Please enter a number.");
+                        Console.Write("Enter admission ID to delete: ");
+                        Console.WriteLine(persistenceHandler.DeleteAdmission(Console.ReadLine())
+                            ? "Admission deleted successfully."
+                            : "Admission deletion failed.");
                         break;
 
                     case "exit":
@@ -120,7 +104,7 @@ namespace HealthOS.Presentation
 
         private static string GenerateHelpString()
         {
-            return "Please write one of the following commands:\n" +
+            return "Available commands:\n" +
                    "- getEmployees\n" +
                    "- getEmployee\n" +
                    "- createEmployee\n" +
@@ -142,37 +126,22 @@ namespace HealthOS.Presentation
             Console.Write("Enter employee name: ");
             string name = Console.ReadLine();
 
-            Console.Write("Enter phone number: ");
-            if (!int.TryParse(Console.ReadLine(), out int phone))
-            {
-                Console.WriteLine("Invalid phone number.");
-                return;
-            }
+            int phone = ReadInt("phone number");
+            int positionId = ReadInt("position ID");
+            int departmentId = ReadInt("department ID");
+            int roomId = ReadInt("room ID");
 
-            Console.Write("Enter position ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int positionId))
+            var employee = new Employee
             {
-                Console.WriteLine("Invalid position ID.");
-                return;
-            }
+                name = name,
+                phone = phone,
+                positionId = positionId,
+                departmentId = departmentId,
+                roomId = roomId
+            };
 
-            Console.Write("Enter department ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int departmentId))
-            {
-                Console.WriteLine("Invalid department ID.");
-                return;
-            }
-
-            Console.Write("Enter room ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int roomId))
-            {
-                Console.WriteLine("Invalid room ID.");
-                return;
-            }
-
-            var employee = new Employee(new Random().Next(), name, phone, positionId, departmentId, roomId);
             persistenceHandler.CreateEmployee(employee);
-            Console.WriteLine("Employee created successfully.");
+            Console.WriteLine("Employee created.");
         }
 
         private static void CreatePatient(IPersistenceHandler persistenceHandler)
@@ -180,64 +149,68 @@ namespace HealthOS.Presentation
             Console.Write("Enter patient name: ");
             string name = Console.ReadLine();
 
-            Console.Write("Enter phone number: ");
-            string phone = Console.ReadLine();
+            int phone = ReadInt("phone number");
+            int cprNumber = ReadInt("CPR number");
 
-            Console.Write("Enter CPR number: ");
-            if (!int.TryParse(Console.ReadLine(), out int cprNumber))
+            var patient = new Patient
             {
-                Console.WriteLine("Invalid CPR number.");
-                return;
-            }
+                name = name,
+                phone = phone,
+                cprNumber = cprNumber
+            };
 
-            var patient = new Patient(new Random().Next(), name, phone, cprNumber);
             persistenceHandler.CreatePatient(patient);
-            Console.WriteLine("Patient created successfully.");
+            Console.WriteLine("Patient created.");
         }
 
         private static void CreateBed(IPersistenceHandler persistenceHandler)
         {
-            Console.Write("Enter bed number: ");
-            string bedNumber = Console.ReadLine();
+            int bedNumber = ReadInt("bed number");
 
-            var bed = new Bed(new Random().Next(), bedNumber);
+            var bed = new Bed
+            {
+                number = bedNumber
+            };
+
             persistenceHandler.CreateBed(bed);
-            Console.WriteLine("Bed created successfully.");
+            Console.WriteLine("Bed created.");
         }
 
         private static void CreateAdmission(IPersistenceHandler persistenceHandler)
         {
-            Console.Write("Enter patient ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int patientId))
-            {
-                Console.WriteLine("Invalid patient ID.");
-                return;
-            }
+            Console.Write("Enter patient ID (ObjectId): ");
+            string patientId = Console.ReadLine();
 
-            Console.Write("Enter room ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int roomId))
-            {
-                Console.WriteLine("Invalid room ID.");
-                return;
-            }
+            int roomId = ReadInt("room ID");
 
-            Console.Write("Enter bed ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int bedId))
-            {
-                Console.WriteLine("Invalid bed ID.");
-                return;
-            }
+            Console.Write("Enter bed ID (ObjectId): ");
+            string bedId = Console.ReadLine();
 
-            Console.Write("Enter assigned employee ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int assignedEmployeeId))
-            {
-                Console.WriteLine("Invalid employee ID.");
-                return;
-            }
+            Console.Write("Enter assigned employee ID (ObjectId): ");
+            string assignedEmployeeId = Console.ReadLine();
 
-            var admission = new Admission(new Random().Next(), patientId, roomId, bedId, assignedEmployeeId);
+            var admission = new Admission
+            {
+                patientId = patientId,
+                roomId = roomId,
+                bedId = bedId,
+                assignedEmployeeId = assignedEmployeeId
+            };
+
             persistenceHandler.CreateAdmission(admission);
-            Console.WriteLine("Admission created successfully.");
+            Console.WriteLine("Admission created.");
+        }
+
+
+        private static int ReadInt(string label)
+        {
+            while (true)
+            {
+                Console.Write($"Enter {label}: ");
+                if (int.TryParse(Console.ReadLine(), out int value))
+                    return value;
+                Console.WriteLine($"Invalid input for {label}. Please enter a number.");
+            }
         }
     }
 }

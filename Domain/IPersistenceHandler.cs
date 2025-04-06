@@ -1,26 +1,27 @@
-using System.Collections.Generic;
 
 /**
  *
  * @author Oliver Aleksander Larsen | ollar22
  */
+using System.Collections.Generic;
 
-namespace HealthOS.Domain
+public interface IPersistenceHandler
 {
-    public interface IPersistenceHandler
-    {
-        List<Employee> GetEmployees();
-        Employee GetEmployee(int id);
-        bool CreateEmployee(Employee employee);
-        List<Patient> GetPatients();
-        Patient GetPatient(int id);
-        bool CreatePatient(Patient patient);
-        List<Bed> GetBeds();
-        Bed GetBed(int id);
-        bool CreateBed(Bed bed);
-        List<Admission> GetAdmissions();
-        Admission GetAdmission(int id);
-        bool CreateAdmission(Admission admission);
-        bool DeleteAdmission(int id);
-    }
+    List<Employee> GetEmployees();
+    Employee GetEmployee(string id);
+    bool CreateEmployee(Employee employee);
+
+    List<Patient> GetPatients();
+    Patient GetPatient(string id);
+    bool CreatePatient(Patient patient);
+
+    List<Bed> GetBeds();
+    Bed GetBed(string id);
+    bool CreateBed(Bed bed);
+
+    List<Admission> GetAdmissions();
+    Admission GetAdmission(string id);
+    bool CreateAdmission(Admission admission);
+    bool DeleteAdmission(string id);
 }
+

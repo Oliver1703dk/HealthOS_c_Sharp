@@ -1,216 +1,72 @@
-using System;
-using System.Collections.Generic;
-using System.Data;
-using Npgsql;
-using HealthOS.Domain;
 
 /**
  *
  * @author Oliver Aleksander Larsen | ollar22
  */
+using MongoDB.Driver;
+using System.Collections.Generic;
 
-namespace HealthOS.Persistence
+public class PersistenceHandler : IPersistenceHandler
 {
-    public class PersistenceHandler : IPersistenceHandler
+    private readonly IMongoDatabase _database;
+
+    public PersistenceHandler()
     {
-        private static PersistenceHandler _instance;
-        private readonly string _connectionString;
-        private NpgsqlConnection _connection;
+        var client = new MongoClient("mongodb://localhost:27017");
+        _database = client.GetDatabase("dm_09");
+    }
 
-        private PersistenceHandler()
-        {
-            string host = "localhost";
-            int port = 5432; // Change to your own port (Should be the same)
-            string database = "postgres"; // Change to your own database
-            string username = "postgres"; // Change to your own username
-            string password = ""; // Change to your own password
+    public List<Employee> GetEmployees() =>
+        _database.GetCollection<Employee>("employees").Find(_ => true).ToList();
 
-            _connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password}";
+    public Employee GetEmployee(string id) =>
+        _database.GetCollection<Employee>("employees").Find(e => e.id == id).FirstOrDefault();
 
-            InitializePostgresqlDatabase();
-        }
+    public bool CreateEmployee(Employee employee)
+    {
+        _database.GetCollection<Employee>("employees").InsertOne(employee);
+        return true;
+    }
 
-        public static PersistenceHandler GetInstance()
-        {
-            return _instance ??= new PersistenceHandler();
-        }
+    public List<Patient> GetPatients() =>
+        _database.GetCollection<Patient>("patients").Find(_ => true).ToList();
 
-        private void InitializePostgresqlDatabase()
-        {
-            try
-            {
-                _connection = new NpgsqlConnection(_connectionString);
-                _connection.Open();
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine(ex.Message);
-                Environment.Exit(-1);
-            }
-        }
+    public Patient GetPatient(string id) =>
+        _database.GetCollection<Patient>("patients").Find(p => p.id == id).FirstOrDefault();
 
-        public List<Employee> GetEmployees()
-        {
-            List<Employee> employees = new List<Employee>();
-            using var cmd = new NpgsqlCommand("SELECT * FROM employees", _connection);
-            cmd.Prepare();
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                employees.Add(new Employee(
-                    reader.GetInt32(0), reader.GetString(1), reader.GetInt32(2),
-                    reader.GetInt32(3), reader.GetInt32(4), reader.GetInt32(5)
-                ));
-            }
-            return employees;
-        }
+    public bool CreatePatient(Patient patient)
+    {
+        _database.GetCollection<Patient>("patients").InsertOne(patient);
+        return true;
+    }
 
-        public Employee GetEmployee(int id)
-        {
-            using var cmd = new NpgsqlCommand("SELECT * FROM employees WHERE id = @id", _connection);
-            cmd.Parameters.AddWithValue("@id", id);
-            cmd.Prepare();
-            using var reader = cmd.ExecuteReader();
-            return reader.Read()
-                ? new Employee(reader.GetInt32(0), reader.GetString(1), reader.GetInt32(2),
-                               reader.GetInt32(3), reader.GetInt32(4), reader.GetInt32(5))
-                : null;
-        }
+    public List<Bed> GetBeds() =>
+        _database.GetCollection<Bed>("beds").Find(_ => true).ToList();
 
-        public bool CreateEmployee(Employee employee)
-        {
-            using var cmd = new NpgsqlCommand(
-                "INSERT INTO employees (name, phone, position_id, department_id, room_id) VALUES (@name, @phone, @position_id, @department_id, @room_id)", _connection);
-            cmd.Parameters.AddWithValue("@name", employee.Name);
-            cmd.Parameters.AddWithValue("@phone", employee.Phone);
-            cmd.Parameters.AddWithValue("@position_id", employee.PositionId);
-            cmd.Parameters.AddWithValue("@department_id", employee.DepartmentId);
-            cmd.Parameters.AddWithValue("@room_id", employee.RoomId);
-            cmd.Prepare();
-            return cmd.ExecuteNonQuery() > 0;
-        }
+    public Bed GetBed(string id) =>
+        _database.GetCollection<Bed>("beds").Find(b => b.id == id).FirstOrDefault();
 
-        public List<Patient> GetPatients()
-        {
-            List<Patient> patients = new List<Patient>();
-            using var cmd = new NpgsqlCommand("SELECT * FROM patients", _connection);
-            cmd.Prepare();
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                patients.Add(new Patient(
-                    reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetInt32(3)
-                ));
-            }
-            return patients;
-        }
+    public bool CreateBed(Bed bed)
+    {
+        _database.GetCollection<Bed>("beds").InsertOne(bed);
+        return true;
+    }
 
-        public Patient GetPatient(int id)
-        {
-            using var cmd = new NpgsqlCommand("SELECT * FROM patients WHERE id = @id", _connection);
-            cmd.Parameters.AddWithValue("@id", id);
-            cmd.Prepare();
-            using var reader = cmd.ExecuteReader();
-            return reader.Read()
-                ? new Patient(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetInt32(3))
-                : null;
-        }
+    public List<Admission> GetAdmissions() =>
+        _database.GetCollection<Admission>("admissions").Find(_ => true).ToList();
 
-        public bool CreatePatient(Patient patient)
-        {
-            using var cmd = new NpgsqlCommand(
-                "INSERT INTO patients (name, phone, cpr_number) VALUES (@name, @phone, @cpr_number)", _connection);
-            cmd.Parameters.AddWithValue("@name", patient.Name);
-            cmd.Parameters.AddWithValue("@phone", patient.Phone);
-            cmd.Parameters.AddWithValue("@cpr_number", patient.CprNumber);
-            cmd.Prepare();
-            return cmd.ExecuteNonQuery() > 0;
-        }
+    public Admission GetAdmission(string id) =>
+        _database.GetCollection<Admission>("admissions").Find(a => a.id == id).FirstOrDefault();
 
-        public List<Bed> GetBeds()
-        {
-            List<Bed> beds = new List<Bed>();
-            using var cmd = new NpgsqlCommand("SELECT * FROM beds", _connection);
-            cmd.Prepare();
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                beds.Add(new Bed(reader.GetInt32(0), reader.GetString(1)));
-            }
-            return beds;
-        }
+    public bool CreateAdmission(Admission admission)
+    {
+        _database.GetCollection<Admission>("admissions").InsertOne(admission);
+        return true;
+    }
 
-        public bool CreateBed(Bed bed)
-        {
-            using var cmd = new NpgsqlCommand(
-                "INSERT INTO beds (bed_number) VALUES (@bed_number)", _connection);
-            cmd.Parameters.AddWithValue("@bed_number", bed.BedNumber);
-            cmd.Prepare();
-            return cmd.ExecuteNonQuery() > 0;
-        }
-
-        public List<Admission> GetAdmissions()
-        {
-            List<Admission> admissions = new List<Admission>();
-            using var cmd = new NpgsqlCommand("SELECT * FROM admissions", _connection);
-            cmd.Prepare();
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                admissions.Add(new Admission(
-                    reader.GetInt32(0), reader.GetInt32(1), reader.GetInt32(2), reader.GetInt32(3), reader.GetInt32(4)
-                ));
-            }
-            return admissions;
-        }
-
-        public bool CreateAdmission(Admission admission)
-        {
-            using var cmd = new NpgsqlCommand(
-                "INSERT INTO admissions (patient_id, room_id, bed_id, assigned_employee_id) VALUES (@patient_id, @room_id, @bed_id, @assigned_employee_id)", _connection);
-            cmd.Parameters.AddWithValue("@patient_id", admission.PatientId);
-            cmd.Parameters.AddWithValue("@room_id", admission.RoomId);
-            cmd.Parameters.AddWithValue("@bed_id", admission.BedId);
-            cmd.Parameters.AddWithValue("@assigned_employee_id", admission.AssignedEmployeeId);
-            cmd.Prepare();
-            return cmd.ExecuteNonQuery() > 0;
-        }
-
-        public bool DeleteAdmission(int id)
-        {
-            using var cmd = new NpgsqlCommand("DELETE FROM admissions WHERE id = @id", _connection);
-            cmd.Parameters.AddWithValue("@id", id);
-            cmd.Prepare();
-            return cmd.ExecuteNonQuery() > 0;
-        }
-        
-        public Bed GetBed(int id)
-        {
-            using var cmd = new NpgsqlCommand("SELECT * FROM beds WHERE id = @id", _connection);
-            cmd.Parameters.AddWithValue("@id", id);
-            cmd.Prepare();
-            using var reader = cmd.ExecuteReader();
-            return reader.Read() 
-                ? new Bed(reader.GetInt32(0), reader.GetString(1)) 
-                : null;
-        }
-
-        public Admission GetAdmission(int id)
-        {
-            using var cmd = new NpgsqlCommand("SELECT * FROM admissions WHERE id = @id", _connection);
-            cmd.Parameters.AddWithValue("@id", id);
-            cmd.Prepare();
-            using var reader = cmd.ExecuteReader();
-            return reader.Read() 
-                ? new Admission(
-                    reader.GetInt32(0), 
-                    reader.GetInt32(1), 
-                    reader.GetInt32(2), 
-                    reader.GetInt32(3), 
-                    reader.GetInt32(4)
-                ) 
-                : null;
-        }
-
+    public bool DeleteAdmission(string id)
+    {
+        _database.GetCollection<Admission>("admissions").DeleteOne(a => a.id == id);
+        return true;
     }
 }
